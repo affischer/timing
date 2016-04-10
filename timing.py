@@ -70,13 +70,13 @@ def main():
     f = open('keySoFar.txt','r')
     key = f.read()
     f.close()
-    for i in range(0,3508):
-        key = findNextChar(key)
-        if i%10==0 and isCorrect(queryOnce(key)):
-            print('writing to file')
-            f = open('keySoFar.txt','w')
-            f.write(key)
-            f.close()
+#    for i in range(0,3508):
+#        key = findNextChar(key)
+#        if i%10==0 and isCorrect(queryOnce(key)):
+#            print('writing to file')
+#            f = open('keySoFar.txt','w')
+#            f.write(key)
+#            f.close()
     return
 
 if __name__ == "__main__":
