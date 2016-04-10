@@ -38,12 +38,13 @@ def isCorrect(time):
 
 def findNextChar(currentKey,tries=0):
     for i in keyChars:
-        duration = queryOnce(currentKey+i+"*")
+        duration = queryOnce("*"+currentKey+i+"*")
         if isCorrect(duration):
             print(currentKey+i)
             return currentKey+i
     #something went wrong
-    if isCorrect(queryOnce(currentKey)):
+    currentDuration =queryOnce(currentKey) 
+    if isCorrect(currentDuration):
         print("Cant find next char in this key:\n"+currentKey+"\ntrying again\n")
         if(tries>10):
             print("Tried 10 times and failed, current key is:\n"+currentKey)
@@ -53,23 +54,24 @@ def findNextChar(currentKey,tries=0):
             return findNextChar(currentKey,tries=tries+1)
     else:
         print("Incorrect key accepted once:\n"+currentKey)
+        print("duration: "+str(currentDuration))
         if currentKey!='':
             return findNextChar(currentKey[:-1])
 
 def writeToFile(key):
     print('writing '+ str(len(key))+' characters to file')
-    f = open('keySoFar.txt','w')
+    f = open('keySoFar2.txt','w')
     f.write(key)
     f.close()
 
 def main():
-    f = open('keySoFar.txt','r')
+    f =  open('keySoFar2.txt','r')
     key = f.read()
     f.close()
     for i in range(0,3508-len(key)):
         key = findNextChar(key)
         if i%10==0:
-            writeToFile(key)
+            writeToFile(key[1:])
     return
 
 if __name__ == "__main__":

